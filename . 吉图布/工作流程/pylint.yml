@@ -1,0 +1,21 @@
+# -*- coding:utf-8 -*-
+# 导入库
+import cv2
+
+# 打开摄像头
+capture = cv2.VideoCapture(0)#如果有多个摄像头，电脑自带的是0
+
+# 获取摄像头的实时画面
+while True:  #当摄像头打开时循环
+    # 读取摄像头的帧画面，必须要时刻刷新
+    frame = capture.read()[1]
+    # 显示图片（用来渲染画面）
+    cv2.imshow('Azrael',frame)
+    # 如果要退出窗口
+    if cv2.waitKey(5)&0xFF == 27: #按esc退出
+
+# 释放资源，这步非常重要
+        capture.release()
+
+# 关闭窗口
+cv2.destroyWindow()
