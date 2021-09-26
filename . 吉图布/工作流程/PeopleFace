@@ -1,0 +1,68 @@
+# -*- coding:utf-8 -*-
+
+# 获取相关数据
+import cv2
+import os
+
+def CatchPTCFromVideo(catch_pic_num,path_name):
+    # 视频来源，可以是下载好的视频，也可以是摄像头数据
+    capture = cv2.VideoCapture(0)
+
+    # 告诉opencv使用人脸识别分类器
+    classfier = cv2.CascadeClassifier('haarcascade_frontalface_alt2.xml')
+
+    # 识别出人脸后的边框颜色
+    color = (255,0,0)
+
+    num = 1
+
+    while capture.isOpened():
+        ok,fraem = capture.read()  #读取每一帧数据
+
+        grey = cv2.cvtColor(fraem,cv2.COLOR_BGR2GRAY) #转为灰度图
+
+        faceRects = classfier.detectMultiScale(grey,
+                                               scaleFactor=1.2,  # 这个是每次缩小的比例，默认是1：1
+                                               minNeighbors=3,  # 匹配成功所需的周围矩形框的数目
+                                               minSize=(32, 32)
+                                               )
+
+        if len(faceRects) > 0:
+            for faceRect in faceRects: #单独框出每一张人脸
+                x,y,z,h = faceRect
+
+                #将当前帧保存为图片
+                if not os.path.exists(path_name):
+                    os.mkdir(path_name)
+                img_name = '%s/%d.jpg'%(path_name,num)
+                image = fraem[y-10:y+h+10,x-10:x+z+10]
+                cv2.imwrite(img_name,image)
+
+                num += 1
+                if num > (catch_pic_num):  #捕捉图片超过最大保存数量
+                    break
+
+                #画出矩形边框
+                cv2.rectangle(fraem,(x-5,y-5),(x+z+5,y+h+5),color,2)
+
+                #显示当前捕捉到的人脸
+
+                font = cv2.FONT_HERSHEY_SIMPLEX  #一种字体
+                cv2.putText(fraem,'num%d'%(num),(x+30,y+30),font,1,(255,0,255),4)
+
+                #超过指定最大保存数量，结束程序
+
+        if num > (catch_pic_num):
+            break
+
+        # 显示图像
+        cv2.imshow('Azrael',fraem)
+
+        c = cv2.waitKey(10)
+        if c & 0xFF == 27:
+            break
+    capture.release()
+    cv2.destroyWindow()
+
+if __name__ == '__main__':
+    CatchPTCFromVideo(100,r'E:\pythonPro\FilePro\venv\Scripts\nwq')
